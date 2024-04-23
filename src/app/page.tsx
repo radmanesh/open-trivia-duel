@@ -30,7 +30,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
 import { useGameContext } from "@/contexts/game-provider";
 
 const formSchema = z.object({
