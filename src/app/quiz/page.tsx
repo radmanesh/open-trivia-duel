@@ -5,6 +5,7 @@ import { useQuestions } from "@/services/use-questions";
 import { CircleAlertIcon, CircleEllipsisIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Quiz from "./quiz";
+import { Suspense } from "react";
 
 export default function QuizPage() {
   const params = useSearchParams();
@@ -38,5 +39,9 @@ export default function QuizPage() {
     );
   }
 
-  return <Quiz questions={data} />;
+  return (
+    <Suspense>
+      <Quiz questions={data} />;
+    </Suspense>
+  );
 }
