@@ -70,7 +70,10 @@ export const CategoryForm = ({ categories }: CategoryFormProps) => {
     const selectedCategoryId = getCategoryId(values.category);
 
     // update game state
-    setCategoryForNextRound(values.category, selectedCategoryId);
+    setCategoryForNextRound({
+      category: values.category,
+      categoryId: selectedCategoryId,
+    });
 
     // go to round quiz
     router.push("/quiz");

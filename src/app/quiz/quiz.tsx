@@ -58,7 +58,7 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
       router.push("/score");
     } else {
       // update next round id
-      setNextRound(game.nextRound.id + 1, roundTime);
+      setNextRound({ id: game.nextRound.id + 1, previousRoundTime: roundTime });
 
       // go to next round
       router.push("/round");
@@ -89,20 +89,10 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
       <Card className="min-w-[900px] max-w-[900px] min-h-[400px] max-h-[400px] space-y-4">
         <CardHeader>
           <CardDescription className="flex flex-row items-center justify-between">
-            <p className="text-lg font-semibold text-primary">
-              {currentQuestion + 1} of {game.questionsPerRound}{" "}
-              {game.questionsPerRound > 1 ? "Questions" : "Question"}
-            </p>
-            <p
-              className={cn(
-                "text-center text-2xl text-primary font-bold",
-                Math.floor(questionTimeout / 1_000) <= 10 && "text-red-500/95"
-              )}
-            >
-              {Math.floor(questionTimeout / 1_000)}s
-            </p>
             <div className="flex flex-row items-center space-x-2">
-              <Badge className="uppercase">{game.nextRound.name}</Badge>
+              <Badge variant="outline" className="uppercase">
+                {game.nextRound.name}
+              </Badge>
               <Badge
                 className="uppercase"
                 variant={
@@ -116,6 +106,14 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
                 {game.level}
               </Badge>
             </div>
+            <p
+              className={cn(
+                "text-center text-2xl font-bold",
+                Math.floor(questionTimeout / 1_000) <= 10 && "text-red-500/95"
+              )}
+            >
+              {Math.floor(questionTimeout / 1_000)}s
+            </p>
           </CardDescription>
         </CardHeader>
         <Separator orientation="horizontal" />
@@ -127,7 +125,11 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
           />
         </CardContent>
         <Separator orientation="horizontal" />
-        <CardFooter className="flex flex-row items-center justify-end space-x-4">
+        <CardFooter className="flex flex-row items-center justify-between space-x-4">
+          <p className="text-lg font-semibold text-primary">
+            {currentQuestion + 1} of {game.questionsPerRound}{" "}
+            {game.questionsPerRound > 1 ? "Questions" : "Question"}
+          </p>
           {questions.length === currentQuestion + 1 ? (
             <Button disabled={!answered} onClick={handleNetRoundClick}>
               {game.totalRounds === game.nextRound.id ? "Finish" : "Next Round"}
@@ -139,10 +141,10 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
                 disabled={answered}
                 onClick={skipQuestion}
               >
-                Skip
+                Skip Question
               </Button>
               <Button disabled={!answered} onClick={nextQuestion}>
-                Next
+                Next Question
               </Button>
             </div>
           )}
