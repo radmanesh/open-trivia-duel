@@ -39,13 +39,16 @@ const formSchema = z.object({
   gameDifficulty: z.union([
     z.literal("easy"),
     z.literal("medium"),
-    z.literal("difficult"),
+    z.literal("hard"),
   ]),
 });
 
 export default function Home() {
+  // hooks
   const router = useRouter();
-  const { updateGameDetails, gameDetails } = useGameContext();
+  const { startGame } = useGameContext();
+
+  // create game form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,21 +59,21 @@ export default function Home() {
     },
   });
 
+  // submit new game form data
   function onSubmit(values: z.infer<typeof formSchema>) {
     // prepare game object
     const { rounds, playerName, questionsPerRound, gameDifficulty } = values;
 
-    // update game context
-    updateGameDetails({
-      playerName,
-      questionsPerRound,
+    // start game
+    startGame({
+      level: gameDifficulty,
+      player: playerName,
       totalRounds: rounds,
-      difficulty: gameDifficulty,
-      currentRound: gameDetails.currentRound + 1,
+      questionsPerRound,
     });
 
     // navigate to select a category screen
-    router.push(`/category`);
+    router.push(`/round`);
   }
 
   return (
@@ -155,7 +158,7 @@ export default function Home() {
                         <SelectContent position="popper">
                           <SelectItem value="easy">Easy</SelectItem>
                           <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="difficult">Difficult</SelectItem>
+                          <SelectItem value="hard">Hard</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
