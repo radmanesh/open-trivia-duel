@@ -25,7 +25,8 @@ const timeoutDict = {
 
 const Quiz = ({ questions }: { questions: Question[] }) => {
   const router = useRouter();
-  const { game, setAnswers, finishGame, setNextRound } = useGameContext();
+  const { game, setAnswers, finishGame, setNextRound, addQuestionTime } =
+    useGameContext();
 
   const [roundTime, setRoundTime] = useState(0);
   const [answered, setAnswered] = useState(false);
@@ -37,6 +38,7 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
   // handlers
   const nextQuestion = () => {
     setAnswered(false);
+    addQuestionTime(questionTimeout);
     setCurrentQuestion((prev) => prev + 1);
     setRoundTime((prev) => prev + questionTimeout);
     setQuestionTimeOut(timeoutDict[game.level]);
@@ -44,13 +46,17 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
 
   const skipQuestion = useCallback(() => {
     setCurrentQuestion((prev) => prev + 1);
+    addQuestionTime(questionTimeout);
     setAnswers({ ...game.answers, skipped: game.answers.skipped + 1 });
     setRoundTime((prev) => prev + questionTimeout);
     setQuestionTimeOut(timeoutDict[game.level]);
-  }, [setAnswers, game.answers, game.level, questionTimeout]);
+  }, [setAnswers, game.answers, game.level, questionTimeout, addQuestionTime]);
 
   const handleNetRoundClick = () => {
     if (game.totalRounds === game.nextRound.id) {
+      // add last question time
+      addQuestionTime(questionTimeout);
+
       // game finished
       finishGame();
 

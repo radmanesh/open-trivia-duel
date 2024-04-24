@@ -18,7 +18,7 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function ScorePage() {
   const router = useRouter();
-  const { game, resetGame } = useGameContext();
+  const { game, resetGame, getTotalQuestions } = useGameContext();
 
   const totalQuestions = useMemo(
     () => game.questionsPerRound * game.totalRounds,
@@ -64,6 +64,34 @@ export default function ScorePage() {
               labels: ["Wrong", "Correct", "Skipped"],
               colors: ["#ef4444", "#22c55e", "#64748b"],
             }}
+          />
+        </Card>
+        <Card className="flex flex-col items-center justify-center">
+          <Chart
+            type="line"
+            width={500}
+            height={300}
+            options={{
+              chart: { zoom: { enabled: true } },
+              stroke: { curve: "smooth" },
+              title: { text: "Time taken for each question", align: "center" },
+              xaxis: {
+                title: { text: "question" },
+                categories: [
+                  ...Array.from({ length: getTotalQuestions() }).map(
+                    (_, i) => i + 1
+                  ),
+                ],
+              },
+              yaxis: {
+                min: 30,
+                max: 90,
+                title: { text: "time (S)" },
+              },
+            }}
+            series={[
+              { data: game.questionsTimeMatrix.map((time) => time / 1_000) },
+            ]}
           />
         </Card>
       </div>
