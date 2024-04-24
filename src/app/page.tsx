@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -31,6 +30,8 @@ import {
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { useGameContext } from "@/contexts/game-provider";
+import { Separator } from "@/components/ui/separator";
+import { BoxesIcon } from "lucide-react";
 
 const formSchema = z.object({
   rounds: z.number().min(1).max(3),
@@ -78,20 +79,26 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
-      <Card className="w-[450px]">
-        <CardHeader>
-          <CardTitle>Open Trivia</CardTitle>
-          <CardDescription>A multi-round trivia game</CardDescription>
+      <Card className="w-[450px] space-y-3">
+        <CardHeader className="flex flex-col items-center">
+          <BoxesIcon className="h-10 w-10 text-primary/95 hover:text-primary/90" />
+          <CardTitle className="text-primary/95 font-bold">
+            Open Trivia
+          </CardTitle>
+          <CardDescription>
+            A multi round trivia game built with Open Trivia API
+          </CardDescription>
         </CardHeader>
+        <Separator orientation="horizontal" />
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <FormField
                 name="playerName"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Player Name</FormLabel>
+                    <FormLabel>Player</FormLabel>
                     <FormControl>
                       <Input placeholder="player name" {...field} />
                     </FormControl>
@@ -146,7 +153,7 @@ export default function Home() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Game Difficulty</FormLabel>
+                    <FormLabel>Level</FormLabel>
                     <FormControl>
                       <Select
                         value={field.value}
@@ -166,7 +173,7 @@ export default function Home() {
                 )}
               />
               <div className="flex justify-end">
-                <Button type="submit">Play</Button>
+                <Button type="submit">Start Game</Button>
               </div>
             </form>
           </Form>
