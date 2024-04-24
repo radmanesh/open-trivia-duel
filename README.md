@@ -12,4 +12,4 @@ A multi round trivia game built with Open Trivia API
 
 ## Demo
 
-See demo:
+See live [here](https://open-trivia-demo.vercel.app/)
