@@ -17,9 +17,8 @@ type QuestionAPIResponse = {
 const getQuestions = async (
   amount: number,
   category: number,
-  difficulty: "easy" | "medium" | "difficult"
+  difficulty: "easy" | "medium" | "hard"
 ): Promise<Question[]> => {
-  console.log({ amount, category, difficulty });
   const req = await fetch(
     `https://opentdb.com/api.php?amount=${amount}&category=${category}&difficulty=${difficulty}`
   );
@@ -29,8 +28,6 @@ const getQuestions = async (
   }
 
   const res = (await req.json()) as QuestionAPIResponse;
-
-  console.log(res);
 
   return res.results;
 };
@@ -42,10 +39,10 @@ export const useQuestions = ({
 }: {
   amount: number;
   category: number;
-  difficulty: "easy" | "medium" | "difficult";
+  difficulty: "easy" | "medium" | "hard";
 }) => {
   return useQuery({
-    queryKey: ["questions"],
+    queryKey: ["questions", category],
     queryFn: () => getQuestions(amount, category, difficulty),
   });
 };
