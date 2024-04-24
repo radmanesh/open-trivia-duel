@@ -31,17 +31,18 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 type CategoryFormProps = {
-  round: number;
   categories: { id: number; name: string }[];
 };
 
+const MIN = 8;
+const MAX = 32;
 const categoryFormSchema = z.object({ category: z.string() });
 
-export const CategoryForm = ({ round, categories }: CategoryFormProps) => {
+export const CategoryForm = ({ categories }: CategoryFormProps) => {
   const router = useRouter();
 
   // fetch game details
-  const { updateGameDetails, gameDetails } = useGameContext();
+  const { game, setCategoryForNextRound } = useGameContext();
 
   // form hook
   const form = useForm<z.infer<typeof categoryFormSchema>>({
@@ -49,11 +50,14 @@ export const CategoryForm = ({ round, categories }: CategoryFormProps) => {
     defaultValues: { category: "" },
   });
 
+  const getRandom = () => {
+    return Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
+  };
+
   // helpers
   const getCategoryId = (categoryName: string) => {
     if (categoryName === "Random") {
-      const availableIds = categories.map(({ id }) => id);
-      return availableIds[Math.floor(Math.random() * availableIds.length)];
+      return getRandom();
     }
 
     return categories.filter((category) => category.name === categoryName)[0]
@@ -65,31 +69,20 @@ export const CategoryForm = ({ round, categories }: CategoryFormProps) => {
     // get selected category id
     const selectedCategoryId = getCategoryId(values.category);
 
-    // update game details object
-    updateGameDetails({
-      currentRound: round,
-      rounds: [
-        ...gameDetails.rounds,
-        { number: round, category: values.category, score: 0, timeTaken: 0 },
-      ],
-      categoriesSelected: [
-        ...gameDetails.categoriesSelected,
-        selectedCategoryId,
-      ],
-    });
+    // update game state
+    setCategoryForNextRound(values.category, selectedCategoryId);
 
     // go to round quiz
-    router.push(
-      `/quiz?amount=${gameDetails.questionsPerRound}&category=${selectedCategoryId}&difficulty=${gameDetails.difficulty}`
-    );
+    router.push("/quiz");
   };
+
   // render form and go to round quiz
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
       <Card className="w-[400px] space-y-2">
         <CardHeader>
-          <CardTitle>Round {round}</CardTitle>
+          <CardTitle>Round {game.nextRound.id}</CardTitle>
           <CardDescription>Select a category for this round</CardDescription>
         </CardHeader>
         <Separator orientation="horizontal" />
@@ -111,22 +104,11 @@ export const CategoryForm = ({ round, categories }: CategoryFormProps) => {
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent position="item-aligned">
-                          {[...categories, { id: 100, name: "Random" }]
-                            .filter(
-                              (category) =>
-                                !gameDetails.categoriesSelected.includes(
-                                  category.id
-                                )
-                            )
-                            .sort((a, b) => a.name.localeCompare(b.name))
-                            .map((category) => (
-                              <SelectItem
-                                key={category.id}
-                                value={category.name}
-                              >
-                                {category.name}
-                              </SelectItem>
-                            ))}
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.name}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormControl>
