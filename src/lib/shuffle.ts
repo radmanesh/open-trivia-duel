@@ -1,0 +1,3 @@
+export const shuffleAnswers = (array: string[]) => {
+  return array.sort(() => Math.random() - 0.5);
+};
