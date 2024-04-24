@@ -8,11 +8,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useMemo } from "react";
-import Chart from "react-apexcharts";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useGameContext } from "@/contexts/game-provider";
+
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function ScorePage() {
   const router = useRouter();
@@ -35,7 +37,8 @@ export default function ScorePage() {
           <CardHeader>
             <CardTitle>{game.player}</CardTitle>
             <CardDescription>
-              You completed the game in {game.duration / 60_000} mins
+              You completed the game in {Math.round(game.duration / 60_000)}{" "}
+              mins
             </CardDescription>
           </CardHeader>
           <Separator orientation="horizontal" />
