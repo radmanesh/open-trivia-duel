@@ -37,8 +37,10 @@ export default function ScorePage() {
           <CardHeader>
             <CardTitle>{game.player}</CardTitle>
             <CardDescription>
-              You completed the game in {Math.round(game.duration / 60_000)}{" "}
-              mins
+              You completed the game in{" "}
+              <span className="font-bold text-primary">
+                {Math.round(game.duration / 60_000)} mins
+              </span>
             </CardDescription>
           </CardHeader>
           <Separator orientation="horizontal" />
@@ -52,6 +54,8 @@ export default function ScorePage() {
           <div className="flex flex-col items-center justify-center">
             <Chart
               type="pie"
+              width={300}
+              height={300}
               series={[
                 game.answers.wrong,
                 game.answers.correct,
