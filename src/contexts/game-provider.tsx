@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useReducer,
+} from "react";
 
 // --- game context types
 type GameProviderProps = {
@@ -44,8 +50,68 @@ type IGameContext = {
   finishGame: () => void;
   getTotalQuestions: () => number;
   setAnswers: (answers: Answers) => void;
-  setNextRound: (id: number, previousRoundTime: number) => void;
-  setCategoryForNextRound: (category: string, categoryId: number) => void;
+  setNextRound: (payload: { id: number; previousRoundTime: number }) => void;
+  setCategoryForNextRound: (payload: {
+    category: string;
+    categoryId: number;
+  }) => void;
+};
+
+// --- game reducer action types
+type Action =
+  | { type: "START_GAME"; payload: ICreateGame }
+  | { type: "RESET_GAME" }
+  | { type: "FINISH_GAME" }
+  | { type: "SET_ANSWERS"; payload: Answers }
+  | {
+      type: "SET_NEXT_ROUND";
+      payload: { id: number; previousRoundTime: number };
+    }
+  | {
+      type: "SET_CATEGORY_FOR_NEXT_ROUND";
+      payload: { category: string; categoryId: number };
+    };
+
+// --- game reducer function
+const gameReducer = (state: Game, action: Action): Game => {
+  switch (action.type) {
+    case "START_GAME":
+      return {
+        ...state,
+        level: action.payload.level,
+        player: action.payload.player,
+        totalRounds: action.payload.totalRounds,
+        questionsPerRound: action.payload.questionsPerRound,
+        nextRound: { id: 1, name: "", categoryId: 0 },
+      };
+    case "RESET_GAME":
+      return initialGameState;
+    case "FINISH_GAME":
+      return { ...state, finished: true };
+    case "SET_ANSWERS":
+      return { ...state, answers: action.payload };
+    case "SET_NEXT_ROUND":
+      return {
+        ...state,
+        nextRound: { ...state.nextRound, id: action.payload.id },
+        duration: state.duration + action.payload.previousRoundTime,
+      };
+    case "SET_CATEGORY_FOR_NEXT_ROUND":
+      return {
+        ...state,
+        crossedCategories: [
+          ...state.crossedCategories,
+          action.payload.categoryId,
+        ],
+        nextRound: {
+          ...state.nextRound,
+          name: action.payload.category,
+          categoryId: action.payload.categoryId,
+        },
+      };
+    default:
+      return state;
+  }
 };
 
 // --- game context
@@ -75,47 +141,30 @@ const initialGameState: Game = {
 
 // --- game context provider
 export const GameProvider = ({ children }: GameProviderProps) => {
-  const [game, setGame] = useState<Game>(initialGameState);
+  const [game, dispatch] = useReducer(gameReducer, initialGameState);
 
-  const startGame = ({
-    level,
-    player,
-    totalRounds,
-    questionsPerRound,
-  }: ICreateGame) => {
-    setGame({
-      ...game,
-      level,
-      player,
-      totalRounds,
-      questionsPerRound,
-      nextRound: { id: 1, name: "", categoryId: 0 },
-    });
+  const startGame = (payload: ICreateGame) => {
+    dispatch({ type: "START_GAME", payload });
   };
 
-  const resetGame = () => setGame(initialGameState);
+  const resetGame = () => dispatch({ type: "RESET_GAME" });
 
-  const finishGame = () => setGame({ ...game, finished: true });
+  const finishGame = () => dispatch({ type: "FINISH_GAME" });
 
   const getTotalQuestions = () => {
     return game.totalRounds * game.questionsPerRound;
   };
 
-  const setAnswers = (answers: Answers) => setGame({ ...game, answers });
+  const setAnswers = (payload: Answers) =>
+    dispatch({ type: "SET_ANSWERS", payload });
 
-  const setNextRound = (id: number, previousRoundTime: number) =>
-    setGame({
-      ...game,
-      nextRound: { ...game.nextRound, id },
-      duration: game.duration + previousRoundTime,
-    });
+  const setNextRound = (payload: { id: number; previousRoundTime: number }) =>
+    dispatch({ payload, type: "SET_NEXT_ROUND" });
 
-  const setCategoryForNextRound = (category: string, categoryId: number) =>
-    setGame({
-      ...game,
-      crossedCategories: [...game.crossedCategories, categoryId],
-      nextRound: { ...game.nextRound, name: category, categoryId },
-    });
+  const setCategoryForNextRound = (payload: {
+    category: string;
+    categoryId: number;
+  }) => dispatch({ payload, type: "SET_CATEGORY_FOR_NEXT_ROUND" });
 
   return (
     <GameContext.Provider
