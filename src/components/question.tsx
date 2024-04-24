@@ -15,16 +15,23 @@ const QuestionCard = ({
   isAnswered,
   setIsAnswered,
 }: QuestionProps) => {
-  const { game, setAnswers } = useGameContext();
+  const { game, updateScore } = useGameContext();
+
+  const currentRoundScore = useMemo(
+    () => game.answers.filter((ans) => ans.round === game.nextRound.id)[0],
+    [game.answers, game.nextRound.id]
+  );
 
   const selectOption = (option: string) => {
     const isCorrect = option === question.correct_answer;
     setIsAnswered(true);
-    setAnswers({
-      ...game.answers,
-      wrong: game.answers.wrong + (isCorrect ? 0 : 1),
-      correct: game.answers.correct + (isCorrect ? 1 : 0),
-    });
+    updateScore([
+      {
+        ...currentRoundScore,
+        wrong: currentRoundScore.wrong + (isCorrect ? 0 : 1),
+        correct: currentRoundScore.correct + (isCorrect ? 1 : 0),
+      },
+    ]);
   };
 
   const displayedOptions = useMemo(

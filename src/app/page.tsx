@@ -92,86 +92,88 @@ export default function Home() {
         <Separator orientation="horizontal" />
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-              <FormField
-                name="playerName"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Player</FormLabel>
-                    <FormControl>
-                      <Input placeholder="player name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="rounds"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Rounds</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        value={field.value.toString()}
-                        placeholder="number of rounds..."
-                        onChange={({ target }) =>
-                          field.onChange(target.valueAsNumber)
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>Min is 1 and max is 3</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="questionsPerRound"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Questions Per Round</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        value={field.value.toString()}
-                        placeholder="questions per round..."
-                        onChange={({ target }) =>
-                          field.onChange(target.valueAsNumber)
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>Min is 1 and max is 10</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="gameDifficulty"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Level</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => field.onChange(value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select game difficulty" />
-                        </SelectTrigger>
-                        <SelectContent position="popper">
-                          <SelectItem value="easy">Easy</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-2">
+                <FormField
+                  name="playerName"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Player</FormLabel>
+                      <FormControl>
+                        <Input placeholder="player name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="rounds"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Rounds</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          value={field.value.toString()}
+                          placeholder="number of rounds..."
+                          onChange={({ target }) =>
+                            field.onChange(target.valueAsNumber)
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>Min is 1 and max is 3</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="questionsPerRound"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Questions Per Round</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          value={field.value.toString()}
+                          placeholder="questions per round..."
+                          onChange={({ target }) =>
+                            field.onChange(target.valueAsNumber)
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>Min is 1 and max is 10</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="gameDifficulty"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Level</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => field.onChange(value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select game difficulty" />
+                          </SelectTrigger>
+                          <SelectContent position="popper">
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="flex justify-end">
                 <Button type="submit">Start Game</Button>
               </div>

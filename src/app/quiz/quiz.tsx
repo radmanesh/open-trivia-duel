@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import QuestionCard from "@/components/question";
 import { Question } from "@/services/use-questions";
 import { Separator } from "@/components/ui/separator";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useGameContext } from "@/contexts/game-provider";
 
 const timeoutDict = {
@@ -25,8 +25,17 @@ const timeoutDict = {
 
 const Quiz = ({ questions }: { questions: Question[] }) => {
   const router = useRouter();
-  const { game, setAnswers, finishGame, setNextRound, addQuestionTime } =
+  const { game, updateScore, finishGame, setNextRound, addQuestionTime } =
     useGameContext();
+
+  console.log("quiz", { game });
+
+  const currentRoundScore = useMemo(
+    () => game.answers.filter((ans) => ans.round === game.nextRound.id)[0],
+    [game.answers, game.nextRound.id]
+  );
+
+  console.log("quiz", currentRoundScore);
 
   const [roundTime, setRoundTime] = useState(0);
   const [answered, setAnswered] = useState(false);
@@ -47,10 +56,18 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
   const skipQuestion = useCallback(() => {
     setCurrentQuestion((prev) => prev + 1);
     addQuestionTime(questionTimeout);
-    setAnswers({ ...game.answers, skipped: game.answers.skipped + 1 });
+    updateScore([
+      { ...currentRoundScore, skipped: currentRoundScore.skipped + 1 },
+    ]);
     setRoundTime((prev) => prev + questionTimeout);
     setQuestionTimeOut(timeoutDict[game.level]);
-  }, [setAnswers, game.answers, game.level, questionTimeout, addQuestionTime]);
+  }, [
+    addQuestionTime,
+    questionTimeout,
+    updateScore,
+    currentRoundScore,
+    game.level,
+  ]);
 
   const handleNetRoundClick = () => {
     if (game.totalRounds === game.nextRound.id) {

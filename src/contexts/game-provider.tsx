@@ -7,6 +7,14 @@ import {
 } from "react";
 
 // --- game context types
+interface GroupedScores {
+  [round: number]: {
+    wrong: number;
+    correct: number;
+    skipped: number;
+  };
+}
+
 type GameProviderProps = {
   children: ReactNode;
 };
@@ -16,11 +24,11 @@ export type GameRound = { id: number; name: string; categoryId: number };
 type Game = {
   player: string;
   level: GameLevel;
-  answers: Answers;
   duration: number;
   finished: boolean;
   totalRounds: number;
   nextRound: GameRound;
+  answers: RoundAnswer[];
   questionsPerRound: number;
   crossedCategories: number[];
   questionsTimeMatrix: number[];
@@ -33,7 +41,8 @@ type ICreateGame = {
   questionsPerRound: number;
 };
 
-type Answers = {
+type RoundAnswer = {
+  round: number;
   wrong: number;
   correct: number;
   skipped: number;
@@ -41,6 +50,7 @@ type Answers = {
 
 type IGameContext = {
   game: Game;
+  getScore: () => { correct: number; wrong: number; skipped: number };
   resetGame: () => void;
   startGame: ({
     level,
@@ -49,9 +59,10 @@ type IGameContext = {
     questionsPerRound,
   }: ICreateGame) => void;
   finishGame: () => void;
+  getAnswers: () => RoundAnswer[];
   getTotalQuestions: () => number;
   addQuestionTime: (time: number) => void;
-  setAnswers: (answers: Answers) => void;
+  updateScore: (answers: RoundAnswer[]) => void;
   setNextRound: (payload: { id: number; previousRoundTime: number }) => void;
   setCategoryForNextRound: (payload: {
     category: string;
@@ -64,7 +75,7 @@ type Action =
   | { type: "START_GAME"; payload: ICreateGame }
   | { type: "RESET_GAME" }
   | { type: "FINISH_GAME" }
-  | { type: "SET_ANSWERS"; payload: Answers }
+  | { type: "UPDATE_SCORE"; payload: RoundAnswer[] }
   | {
       type: "SET_NEXT_ROUND";
       payload: { id: number; previousRoundTime: number };
@@ -87,15 +98,24 @@ const gameReducer = (state: Game, action: Action): Game => {
         level: action.payload.level,
         player: action.payload.player,
         totalRounds: action.payload.totalRounds,
-        questionsPerRound: action.payload.questionsPerRound,
         nextRound: { id: 1, name: "", categoryId: 0 },
+        questionsPerRound: action.payload.questionsPerRound,
+        answers: [
+          ...state.answers,
+          ...Array.from({ length: action.payload.totalRounds }).map((_, i) => ({
+            wrong: 0,
+            correct: 0,
+            skipped: 0,
+            round: i + 1,
+          })),
+        ],
       };
     case "RESET_GAME":
       return initialGameState;
     case "FINISH_GAME":
       return { ...state, finished: true };
-    case "SET_ANSWERS":
-      return { ...state, answers: action.payload };
+    case "UPDATE_SCORE":
+      return { ...state, answers: [...state.answers, ...action.payload] };
     case "SET_NEXT_ROUND":
       return {
         ...state,
@@ -140,6 +160,7 @@ export const useGameContext = () => {
 // --- game initial state
 const initialGameState: Game = {
   player: "",
+  answers: [],
   duration: 0,
   level: "easy",
   totalRounds: 3,
@@ -148,12 +169,17 @@ const initialGameState: Game = {
   crossedCategories: [],
   questionsTimeMatrix: [],
   nextRound: { id: 0, name: "", categoryId: 0 },
-  answers: { wrong: 0, correct: 0, skipped: 0 },
 };
 
 // --- game context provider
 export const GameProvider = ({ children }: GameProviderProps) => {
   const [game, dispatch] = useReducer(gameReducer, initialGameState);
+
+  const getScore = () => ({
+    wrong: game.answers.reduce((cur, acc) => cur + acc.wrong, 0),
+    skipped: game.answers.reduce((cur, acc) => cur + acc.skipped, 0),
+    correct: game.answers.reduce((curr, acc) => curr + acc.correct, 0),
+  });
 
   const startGame = (payload: ICreateGame) => {
     dispatch({ type: "START_GAME", payload });
@@ -167,8 +193,8 @@ export const GameProvider = ({ children }: GameProviderProps) => {
     return game.totalRounds * game.questionsPerRound;
   };
 
-  const setAnswers = (payload: Answers) =>
-    dispatch({ type: "SET_ANSWERS", payload });
+  const updateScore = (payload: RoundAnswer[]) =>
+    dispatch({ type: "UPDATE_SCORE", payload });
 
   const setNextRound = (payload: { id: number; previousRoundTime: number }) =>
     dispatch({ payload, type: "SET_NEXT_ROUND" });
@@ -181,14 +207,43 @@ export const GameProvider = ({ children }: GameProviderProps) => {
   const addQuestionTime = (payload: number) =>
     dispatch({ payload, type: "ADD_QUESTION_TIME" });
 
+  const getAnswers = (): RoundAnswer[] => {
+    const groupedScores: GroupedScores = game.answers.reduce(
+      (accumulator: GroupedScores, current: RoundAnswer) => {
+        const round = current.round;
+        if (!accumulator[round]) {
+          accumulator[round] = {
+            wrong: 0,
+            correct: 0,
+            skipped: 0,
+          };
+        }
+        accumulator[round].wrong += current.wrong;
+        accumulator[round].correct += current.correct;
+        accumulator[round].skipped += current.skipped;
+        return accumulator;
+      },
+      {}
+    );
+
+    const result = Object.entries(groupedScores).map(([round, scores]) => ({
+      round: parseInt(round),
+      ...scores,
+    }));
+
+    return result;
+  };
+
   return (
     <GameContext.Provider
       value={{
         game,
+        getScore,
         resetGame,
         startGame,
-        setAnswers,
+        getAnswers,
         finishGame,
+        updateScore,
         setNextRound,
         addQuestionTime,
         getTotalQuestions,
