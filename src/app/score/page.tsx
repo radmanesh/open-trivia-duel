@@ -46,27 +46,25 @@ export default function ScorePage() {
           <Separator orientation="horizontal" />
           <CardContent>
             <p className="text-4xl font-semibold text-center">
-              {game.answers.correct}/{totalQuestions}
+              Score: {game.answers.correct}/{totalQuestions}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <div className="flex flex-col items-center justify-center">
-            <Chart
-              type="pie"
-              width={300}
-              height={300}
-              series={[
-                game.answers.wrong,
-                game.answers.correct,
-                game.answers.skipped,
-              ]}
-              options={{
-                labels: ["Wrong", "Correct", "Skipped"],
-                colors: ["#ef4444", "#22c55e", "#64748b"],
-              }}
-            />
-          </div>
+        <Card className="flex flex-col items-center justify-center">
+          <Chart
+            type="pie"
+            width={300}
+            height={300}
+            series={[
+              game.answers.wrong,
+              game.answers.correct,
+              game.answers.skipped,
+            ]}
+            options={{
+              labels: ["Wrong", "Correct", "Skipped"],
+              colors: ["#ef4444", "#22c55e", "#64748b"],
+            }}
+          />
         </Card>
       </div>
       <Button size="lg" onClick={handleNewGameClick}>
