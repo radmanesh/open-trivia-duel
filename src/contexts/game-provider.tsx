@@ -23,6 +23,7 @@ type Game = {
   nextRound: GameRound;
   questionsPerRound: number;
   crossedCategories: number[];
+  questionsTimeMatrix: number[];
 };
 
 type ICreateGame = {
@@ -49,6 +50,7 @@ type IGameContext = {
   }: ICreateGame) => void;
   finishGame: () => void;
   getTotalQuestions: () => number;
+  addQuestionTime: (time: number) => void;
   setAnswers: (answers: Answers) => void;
   setNextRound: (payload: { id: number; previousRoundTime: number }) => void;
   setCategoryForNextRound: (payload: {
@@ -70,6 +72,10 @@ type Action =
   | {
       type: "SET_CATEGORY_FOR_NEXT_ROUND";
       payload: { category: string; categoryId: number };
+    }
+  | {
+      type: "ADD_QUESTION_TIME";
+      payload: number;
     };
 
 // --- game reducer function
@@ -95,6 +101,11 @@ const gameReducer = (state: Game, action: Action): Game => {
         ...state,
         nextRound: { ...state.nextRound, id: action.payload.id },
         duration: state.duration + action.payload.previousRoundTime,
+      };
+    case "ADD_QUESTION_TIME":
+      return {
+        ...state,
+        questionsTimeMatrix: [...state.questionsTimeMatrix, action.payload],
       };
     case "SET_CATEGORY_FOR_NEXT_ROUND":
       return {
@@ -135,6 +146,7 @@ const initialGameState: Game = {
   finished: false,
   questionsPerRound: 5,
   crossedCategories: [],
+  questionsTimeMatrix: [],
   nextRound: { id: 0, name: "", categoryId: 0 },
   answers: { wrong: 0, correct: 0, skipped: 0 },
 };
@@ -166,6 +178,9 @@ export const GameProvider = ({ children }: GameProviderProps) => {
     categoryId: number;
   }) => dispatch({ payload, type: "SET_CATEGORY_FOR_NEXT_ROUND" });
 
+  const addQuestionTime = (payload: number) =>
+    dispatch({ payload, type: "ADD_QUESTION_TIME" });
+
   return (
     <GameContext.Provider
       value={{
@@ -175,6 +190,7 @@ export const GameProvider = ({ children }: GameProviderProps) => {
         setAnswers,
         finishGame,
         setNextRound,
+        addQuestionTime,
         getTotalQuestions,
         setCategoryForNextRound,
       }}
