@@ -1,45 +1,57 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
-type Round = {
-  number: number;
-  category: string;
-  score: number;
-  timeTaken: number;
+// --- game context types
+type GameProviderProps = {
+  children: ReactNode;
 };
+export type GameLevel = "easy" | "medium" | "hard";
+export type GameRound = { id: number; name: string; categoryId: number };
 
-type GameDetails = {
-  rounds: Round[];
+type Game = {
+  player: string;
+  level: GameLevel;
+  answers: Answers;
+  duration: number;
+  finished: boolean;
   totalRounds: number;
-  playerName: string;
-  totalScore: number;
-  currentRound: number;
-  numberOfRounds: number;
-  totalTimeTaken: number;
-  wrongQuestions: number;
-  skippedQuestions: number;
-  correctQuestions: number;
+  nextRound: GameRound;
   questionsPerRound: number;
-  categoriesSelected: Array<number>;
-  difficulty: "easy" | "medium" | "difficult";
+  crossedCategories: number[];
 };
 
-type GameContextType = {
-  gameDetails: GameDetails;
-  setPlayerName: (name: string) => void;
-  setCurrentRound: (round: number) => void;
-  updateRoundDetails: (round: Partial<Round>) => void;
-  addToSelectedCategories: (categoryId: number) => void;
-  updateGameDetails: (details: Partial<GameDetails>) => void;
+type ICreateGame = {
+  player: string;
+  level: GameLevel;
+  totalRounds: number;
+  questionsPerRound: number;
 };
 
-const GameContext = createContext<GameContextType | undefined>(undefined);
+type Answers = {
+  wrong: number;
+  correct: number;
+  skipped: number;
+};
 
+type IGameContext = {
+  game: Game;
+  resetGame: () => void;
+  startGame: ({
+    level,
+    player,
+    totalRounds,
+    questionsPerRound,
+  }: ICreateGame) => void;
+  finishGame: () => void;
+  getTotalQuestions: () => number;
+  setAnswers: (answers: Answers) => void;
+  setNextRound: (id: number, previousRoundTime: number) => void;
+  setCategoryForNextRound: (category: string, categoryId: number) => void;
+};
+
+// --- game context
+const GameContext = createContext<IGameContext | undefined>(undefined);
+
+// --- game context hooks
 export const useGameContext = () => {
   const context = useContext(GameContext);
   if (!context) {
@@ -48,66 +60,74 @@ export const useGameContext = () => {
   return context;
 };
 
-type GameProviderProps = {
-  children: ReactNode;
+// --- game initial state
+const initialGameState: Game = {
+  player: "",
+  duration: 0,
+  level: "easy",
+  totalRounds: 3,
+  finished: false,
+  questionsPerRound: 5,
+  crossedCategories: [],
+  nextRound: { id: 0, name: "", categoryId: 0 },
+  answers: { wrong: 0, correct: 0, skipped: 0 },
 };
 
+// --- game context provider
 export const GameProvider = ({ children }: GameProviderProps) => {
-  const [gameDetails, setGameDetails] = useState<GameDetails>({
-    playerName: "",
-    rounds: [],
-    totalScore: 0,
-    wrongQuestions: 0,
-    skippedQuestions: 0,
-    correctQuestions: 0,
-    totalTimeTaken: 0,
-    numberOfRounds: 0,
-    questionsPerRound: 0,
-    currentRound: 0,
-    totalRounds: 0,
-    difficulty: "easy",
-    categoriesSelected: [],
-  });
+  const [game, setGame] = useState<Game>(initialGameState);
 
-  const setPlayerName = (name: string) => {
-    setGameDetails((prevDetails) => ({ ...prevDetails, playerName: name }));
-  };
-
-  const setCurrentRound = (round: number) => {
-    setGameDetails((prevDetails) => ({ ...prevDetails, currentRound: round }));
-  };
-
-  const updateRoundDetails = (round: Partial<Round>) => {
-    setGameDetails((prevDetails) => {
-      const updatedRounds = [...prevDetails.rounds];
-      updatedRounds[prevDetails.currentRound - 1] = {
-        ...updatedRounds[prevDetails.currentRound - 1],
-        ...round,
-      };
-      return { ...prevDetails, rounds: updatedRounds };
+  const startGame = ({
+    level,
+    player,
+    totalRounds,
+    questionsPerRound,
+  }: ICreateGame) => {
+    setGame({
+      ...game,
+      level,
+      player,
+      totalRounds,
+      questionsPerRound,
+      nextRound: { id: 1, name: "", categoryId: 0 },
     });
   };
 
-  const updateGameDetails = (details: Partial<GameDetails>) => {
-    setGameDetails((prevDetails) => ({ ...prevDetails, ...details }));
+  const resetGame = () => setGame(initialGameState);
+
+  const finishGame = () => setGame({ ...game, finished: true });
+
+  const getTotalQuestions = () => {
+    return game.totalRounds * game.questionsPerRound;
   };
 
-  const addToSelectedCategories = (categoryId: number) => {
-    setGameDetails((prev) => ({
-      ...prev,
-      categoriesSelected: [...prev.categoriesSelected, categoryId],
-    }));
-  };
+  const setAnswers = (answers: Answers) => setGame({ ...game, answers });
+
+  const setNextRound = (id: number, previousRoundTime: number) =>
+    setGame({
+      ...game,
+      nextRound: { ...game.nextRound, id },
+      duration: game.duration + previousRoundTime,
+    });
+
+  const setCategoryForNextRound = (category: string, categoryId: number) =>
+    setGame({
+      ...game,
+      crossedCategories: [...game.crossedCategories, categoryId],
+      nextRound: { ...game.nextRound, name: category, categoryId },
+    });
 
   return (
     <GameContext.Provider
       value={{
-        gameDetails,
-        setPlayerName,
-        setCurrentRound,
-        updateRoundDetails,
-        updateGameDetails,
-        addToSelectedCategories,
+        game,
+        resetGame,
+        startGame,
+        setAnswers,
+        finishGame,
+        setNextRound,
+        getTotalQuestions,
+        setCategoryForNextRound,
       }}
     >
       {children}
