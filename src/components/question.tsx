@@ -1,10 +1,8 @@
-import { Question } from "@/services/use-questions";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { Button } from "./ui/button";
-
-const shuffle = (array: string[]) => {
-  return array.sort(() => Math.random() - 0.5);
-};
+import { Question } from "@/services/use-questions";
+import { shuffleAnswers } from "@/lib/shuffle";
+import { Dispatch, SetStateAction, useMemo } from "react";
+import { useGameContext } from "@/contexts/game-provider";
 
 type QuestionProps = {
   question: Question;
@@ -14,26 +12,32 @@ type QuestionProps = {
 
 const QuestionCard = ({
   question,
-  setIsAnswered,
   isAnswered,
+  setIsAnswered,
 }: QuestionProps) => {
-  const [selectedOption, setSelectedOption] = useState("");
+  const { game, setAnswers } = useGameContext();
 
-  const selectOption = (opt: string) => {
-    setSelectedOption(opt);
+  const selectOption = (option: string) => {
+    const isCorrect = option === question.correct_answer;
     setIsAnswered(true);
+    setAnswers({
+      ...game.answers,
+      wrong: game.answers.wrong + (isCorrect ? 0 : 1),
+      correct: game.answers.correct + (isCorrect ? 1 : 0),
+    });
   };
 
   const displayedOptions = useMemo(
-    () => shuffle([question.correct_answer, ...question.incorrect_answers]),
+    () =>
+      shuffleAnswers([question.correct_answer, ...question.incorrect_answers]),
     [question]
   );
 
   return (
-    <div className="p-2">
+    <div className="p-2 space-y-4 min-h-[150px] max-h-[150px] flex flex-col items-center justify-center w-full">
       <h2
-        className="font-bold text-lg mb-3"
-        dangerouslySetInnerHTML={{ __html: `Q: ${question.question}` }}
+        className="font-bold text-lg text-center"
+        dangerouslySetInnerHTML={{ __html: question.question }}
       />
       <div className="grid grid-cols-2 gap-2">
         {isAnswered
@@ -41,6 +45,7 @@ const QuestionCard = ({
               <Button
                 key={i}
                 disabled
+                className="w-full"
                 variant={
                   opt === question.correct_answer ? "success" : "destructive"
                 }
@@ -53,6 +58,7 @@ const QuestionCard = ({
                 key={i}
                 type="button"
                 variant="outline"
+                className="w-full"
                 onClick={() => selectOption(opt)}
               >
                 <div dangerouslySetInnerHTML={{ __html: opt }} />
