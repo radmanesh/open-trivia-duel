@@ -34,9 +34,9 @@ import { Separator } from "@/components/ui/separator";
 import { BoxesIcon } from "lucide-react";
 
 const formSchema = z.object({
-  rounds: z.number().min(1).max(5),
+  rounds: z.number().min(3).max(5),
   playerName: z.string().min(4).max(20),
-  questionsPerRound: z.number().min(1).max(10),
+  questionsPerRound: z.number().min(3).max(10),
   gameDifficulty: z.union([
     z.literal("easy"),
     z.literal("medium"),
@@ -53,9 +53,9 @@ export default function Home() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rounds: 1,
+      rounds: 3,
       playerName: "",
-      questionsPerRound: 5,
+      questionsPerRound: 3,
       gameDifficulty: "easy",
     },
   });
@@ -126,7 +126,7 @@ export default function Home() {
                           }
                         />
                       </FormControl>
-                      <FormDescription>Must be between 1 and 5</FormDescription>
+                      <FormDescription>Must be between 3 and 5</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -148,7 +148,7 @@ export default function Home() {
                         />
                       </FormControl>
                       <FormDescription>
-                        Must be between 1 and 10
+                        Must be between 3 and 10
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
