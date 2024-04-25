@@ -1,41 +1,40 @@
 "use client";
 
-import { CategoryForm } from "./category";
-import { Button } from "@/components/ui/button";
-import { useGameContext } from "@/contexts/game-provider";
-import { useCategories } from "@/services/use-categories";
+// --- 3rd party deps
+import { useRouter } from "next/navigation";
 
-import { CircleEllipsisIcon, CircleAlertIcon } from "lucide-react";
+// --- internal deps
+import { CategoryForm } from "./category";
+import { Loader } from "@/components/loader";
+import { PageError } from "@/components/error";
+import { useCategories } from "@/services/use-categories";
+import { useGameContext } from "@/contexts/game-provider";
 
 export default function CategoryPage() {
-  // get game state from game context
+  const router = useRouter();
+
+  // --- current game state
   const { game } = useGameContext();
 
-  // get available game categories
+  // --- fetch game categories
   const { data: gameCategories, isError, isLoading } = useCategories();
 
+  // --- handle loading state
   if (isLoading) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center space-y-3 bg-slate-50/95">
-        <CircleEllipsisIcon className="text-primary/95 h-10 w-10 animate-spin" />
-        <p className="text-primary/95 font-bold">Loading categories</p>
-      </main>
-    );
+    return <Loader message="Loading question categories..." />;
   }
 
+  // --- handle error or no returned data state
   if (isError || !gameCategories) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center space-y-3 bg-slate-50/95">
-        <CircleAlertIcon className="text-red-500/95 h-10 w-10" />
-        <p className="text-red-500/95">
-          Failed to get questions for this round
-        </p>
-        <Button onClick={() => location.reload()}>Try again</Button>
-      </main>
+      <PageError
+        onClickTryAgain={() => router.push("/")}
+        errorMessage="Failed to load question categories!"
+      />
     );
   }
 
-  // prepare all categories
+  // --- prepare categories, append random and remove previously selected ones
   const allCategories = [...gameCategories, { id: 8, name: "Random" }]
     .filter((category) => !game.crossedCategories.includes(category.id))
     .sort((catA, catB) => catA.name.localeCompare(catB.name));
