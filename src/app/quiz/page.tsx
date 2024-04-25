@@ -1,7 +1,8 @@
 "use client";
 
 // --- 3rd party deps
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { redirect, useRouter } from "next/navigation";
 
 // --- internal deps
 import { Quiz } from "./quiz";
@@ -15,6 +16,13 @@ export default function QuizPage() {
 
   // --- current game state
   const { game } = useGameContext();
+
+  useEffect(() => {
+    // user has refreshed the page, so no game object
+    if (game.player === "") {
+      redirect("/");
+    }
+  }, [game.player]);
 
   // --- fetch questions for the selected category and level
   const {
