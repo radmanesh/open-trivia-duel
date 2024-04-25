@@ -1,40 +1,47 @@
 "use client";
 
-import Quiz from "./quiz";
-import { Button } from "@/components/ui/button";
+// --- 3rd party deps
+import { useRouter } from "next/navigation";
+
+// --- internal deps
+import { Quiz } from "./quiz";
+import { Loader } from "@/components/loader";
+import { PageError } from "@/components/error";
 import { useQuestions } from "@/services/use-questions";
-import { CircleAlertIcon, CircleEllipsisIcon } from "lucide-react";
 import { useGameContext } from "@/contexts/game-provider";
 
 export default function QuizPage() {
+  const router = useRouter();
+
+  // --- current game state
   const { game } = useGameContext();
 
-  const { data, isError, isLoading } = useQuestions({
+  // --- fetch questions for the selected category and level
+  const {
+    isError,
+    isLoading,
+    data: categoryQuestions,
+  } = useQuestions({
     amount: Number(game.questionsPerRound),
     category: Number(game.nextRound.categoryId),
     difficulty: game.level,
   });
 
+  // --- handle loading state
   if (isLoading) {
+    return <Loader message="Loading questions..." />;
+  }
+
+  // --- handle error or no returned data state
+  if (isError || !categoryQuestions) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center space-y-3 bg-slate-50/95">
-        <CircleEllipsisIcon className="text-primary/95 h-10 w-10 animate-spin" />
-        <p className="text-primary/95 font-bold">Loading questions</p>
-      </main>
+      <PageError
+        onClickTryAgain={() => router.push("/")}
+        errorMessage="Failed to load questions for this round!"
+      />
     );
   }
 
-  if (isError || data === undefined) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center space-y-3 bg-slate-50/95">
-        <CircleAlertIcon className="text-red-500/95 h-10 w-10" />
-        <p className="text-red-500/95">
-          Failed to get questions for this round
-        </p>
-        <Button onClick={() => location.reload()}>Try again</Button>
-      </main>
-    );
-  }
-
-  return <Quiz questions={data} />;
+  // --- render questions to the user
+  return <Quiz questions={categoryQuestions} />;
 }
