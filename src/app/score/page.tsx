@@ -33,8 +33,10 @@ export default function ScorePage() {
   // --- extracting data for each category
   const rounds = useMemo(() => data.map((item) => item.round), [data]);
   const correct = useMemo(() => data.map((item) => item.correct), [data]);
-  const wrong = useMemo(() => data.map((item) => -item.wrong), [data]);
-  const skipped = useMemo(() => data.map((item) => -item.skipped), [data]);
+  const incorrect = useMemo(
+    () => data.map((item) => -(item.wrong + item.skipped)),
+    [data]
+  );
 
   useEffect(() => {
     // user has refreshed the page, so no game object
@@ -94,7 +96,7 @@ export default function ScorePage() {
             height={300}
             options={{
               chart: { stacked: true, toolbar: { show: false } },
-              colors: ["#22c55e", "#ef4444", "#64748b"],
+              colors: ["#22c55e", "#ef4444"],
               plotOptions: {
                 bar: {
                   horizontal: false,
@@ -110,11 +112,7 @@ export default function ScorePage() {
             }}
             series={[
               { name: "Correct", data: correct },
-              { name: "Wrong", data: wrong },
-              {
-                name: "Skipped",
-                data: skipped,
-              },
+              { name: "Wrong/Skipped", data: incorrect },
             ]}
           />
         </Card>
