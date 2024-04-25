@@ -134,7 +134,7 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
-      <Card className="min-w-full max-w-full min-h-[600px] max-h-[60px] md:min-h-[430px] md:max-h-[430px] space-y-16 md:space-y-6">
+      <Card className="min-w-full max-w-full min-h-[750px] max-h-[750px] md:min-h-[450px] md:max-h-[450px] space-y-24 md:space-y-8">
         <CardHeader>
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-2">

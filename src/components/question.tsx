@@ -47,13 +47,13 @@ const QuestionCard = ({
         className="font-bold text-lg text-center"
         dangerouslySetInnerHTML={{ __html: question.question }}
       />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
         {isAnswered
           ? displayedOptions.map((opt, i) => (
               <Button
                 key={i}
                 disabled
-                className="w-full"
+                className="w-full text-wrap min-h-[65px]"
                 variant={
                   opt === question.correct_answer ? "success" : "destructive"
                 }
@@ -66,10 +66,10 @@ const QuestionCard = ({
                 key={i}
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full text-wrap min-h-[65px]"
                 onClick={() => selectOption(opt)}
               >
-                <div dangerouslySetInnerHTML={{ __html: opt }} />
+                <span dangerouslySetInnerHTML={{ __html: opt }} />
               </Button>
             ))}
       </div>
