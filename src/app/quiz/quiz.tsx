@@ -51,7 +51,11 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     setAnswered(false);
 
     // append question elapsed time to game state
-    addQuestionTime(questionTimeout);
+    addQuestionTime(
+      questionTimeout === timeoutDict[game.level]
+        ? 0
+        : timeoutDict[game.level] - questionTimeout
+    );
 
     // update current question index
     setCurrentQuestion((prev) => prev + 1);
@@ -69,7 +73,11 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     setCurrentQuestion((prev) => prev + 1);
 
     // append question elapsed time to game state
-    addQuestionTime(questionTimeout);
+    addQuestionTime(
+      questionTimeout === timeoutDict[game.level]
+        ? 0
+        : timeoutDict[game.level] - questionTimeout
+    );
 
     // update current game score
     // increase the # of skipped answers for the round
