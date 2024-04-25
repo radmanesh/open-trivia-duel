@@ -36,6 +36,7 @@ const QuestionCard = ({
 
   const displayedOptions = useMemo(
     () =>
+      question &&
       shuffleAnswers([question.correct_answer, ...question.incorrect_answers]),
     [question]
   );
