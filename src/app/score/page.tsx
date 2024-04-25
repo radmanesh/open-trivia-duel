@@ -90,7 +90,7 @@ export default function ScorePage() {
             series={[getScore().wrong, getScore().correct, getScore().skipped]}
             options={{
               labels: ["Wrong", "Correct", "Skipped"],
-              colors: ["#ef4444", "#22c55e", "#64748b"],
+              colors: ["#ef4444", "#22c55e", "#262626"],
             }}
           />
         </Card>
