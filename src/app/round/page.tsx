@@ -25,7 +25,7 @@ export default function CategoryPage() {
   }
 
   // --- handle error or no returned data state
-  if (isError || !gameCategories) {
+  if (isError || !gameCategories || gameCategories === undefined) {
     return (
       <PageError
         onClickTryAgain={() => router.push("/")}

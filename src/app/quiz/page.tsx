@@ -33,7 +33,7 @@ export default function QuizPage() {
   }
 
   // --- handle error or no returned data state
-  if (isError || !categoryQuestions) {
+  if (isError || !categoryQuestions || categoryQuestions === undefined) {
     return (
       <PageError
         onClickTryAgain={() => router.push("/")}
