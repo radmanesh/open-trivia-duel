@@ -41,7 +41,7 @@ export default function ScorePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center space-y-5 bg-slate-50/95">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-full max-w-full">
         <Card className="space-y-3">
           <CardHeader>
             <CardTitle>{game.player}</CardTitle>

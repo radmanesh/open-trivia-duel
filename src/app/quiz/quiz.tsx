@@ -109,7 +109,7 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
-      <Card className="min-w-[900px] max-w-[900px] min-h-[400px] max-h-[400px] space-y-4">
+      <Card className="min-w-full max-w-full min-h-[430px] max-h-[430px] space-y-6">
         <CardHeader>
           <CardDescription className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-2">
@@ -140,7 +140,7 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
           </CardDescription>
         </CardHeader>
         <Separator orientation="horizontal" />
-        <CardContent>
+        <CardContent className="py-4">
           <QuestionCard
             isAnswered={answered}
             setIsAnswered={setAnswered}
@@ -164,10 +164,10 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
                 disabled={answered}
                 onClick={skipQuestion}
               >
-                Skip Question
+                Skip
               </Button>
               <Button disabled={!answered} onClick={nextQuestion}>
-                Next Question
+                Next
               </Button>
             </div>
           )}

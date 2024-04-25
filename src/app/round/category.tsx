@@ -83,7 +83,7 @@ export const CategoryForm = ({ categories }: CategoryFormProps) => {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
-      <Card className="w-[400px] space-y-2">
+      <Card className="w-[400px] space-y-2 min-h-full max-h-full">
         <CardHeader>
           <CardTitle>Round {game.nextRound.id}</CardTitle>
           <CardDescription>Select a category for this round</CardDescription>

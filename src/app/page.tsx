@@ -78,8 +78,8 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
-      <Card className="w-[450px] space-y-3">
+    <main className="flex min-h-screen flex-col items-center justify-center">
+      <Card className="space-y-3 min-w-full max-w-full">
         <CardHeader className="flex flex-col items-center">
           <BoxesIcon className="h-10 w-10 text-primary/95 hover:text-primary/90" />
           <CardTitle className="text-primary/95 font-bold">
