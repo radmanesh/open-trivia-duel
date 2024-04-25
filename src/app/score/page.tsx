@@ -1,8 +1,9 @@
 "use client";
 
 // --- 3rd party deps
-import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useEffect, useMemo } from "react";
+import { redirect, useRouter } from "next/navigation";
 
 // --- internal deps
 import {
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import { formatTime } from "@/lib/format-time";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -35,6 +35,13 @@ export default function ScorePage() {
   const correct = useMemo(() => data.map((item) => item.correct), [data]);
   const wrong = useMemo(() => data.map((item) => -item.wrong), [data]);
   const skipped = useMemo(() => data.map((item) => -item.skipped), [data]);
+
+  useEffect(() => {
+    // user has refreshed the page, so no game object
+    if (game.player === "") {
+      redirect("/");
+    }
+  }, [game.player]);
 
   // --- total #of questions
   const totalQuestions = useMemo(
