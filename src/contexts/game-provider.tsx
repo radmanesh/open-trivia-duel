@@ -1,4 +1,3 @@
-import { groupBy } from "@/lib/groupBy";
 import { createContext, useContext, ReactNode, useReducer } from "react";
 
 // --- game context types
@@ -203,16 +202,28 @@ export const GameProvider = ({ children }: GameProviderProps) => {
     dispatch({ payload, type: "ADD_QUESTION_TIME" });
 
   const getAnswers = (): RoundAnswer[] => {
-    const groupedScores: GroupedScores = groupBy(game.answers, (answer) =>
-      answer.round.toString()
+    const groupedScores: GroupedScores = game.answers.reduce(
+      (accumulator: GroupedScores, current: RoundAnswer) => {
+        const round = current.round;
+        if (!accumulator[round]) {
+          accumulator[round] = {
+            wrong: 0,
+            correct: 0,
+            skipped: 0,
+          };
+        }
+        accumulator[round].wrong += current.wrong;
+        accumulator[round].correct += current.correct;
+        accumulator[round].skipped += current.skipped;
+        return accumulator;
+      },
+      {}
     );
 
     const result = Object.entries(groupedScores).map(
-      ([round, { wrong, correct, skipped }]) => ({
+      ([round, { ...rest }]) => ({
         round: parseInt(round),
-        wrong,
-        correct,
-        skipped,
+        ...rest,
       })
     );
 
