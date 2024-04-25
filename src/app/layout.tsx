@@ -1,12 +1,17 @@
-"use client";
-
-import { Inter } from "next/font/google";
 import "./globals.css";
-import ReactQueryProvider from "@/contexts/react-query-provider";
-import { GameProvider } from "@/contexts/game-provider";
-import Head from "next/head";
+
+import { Metadata } from "next";
+import { Inter } from "next/font/google";
+
+import { Providers } from "./providers";
+import MaxWidthWrapper from "@/components/max-width-wrapper";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Open Trivia",
+  description: "A multi round trivia game built with Open Trivia API",
+};
 
 export default function RootLayout({
   children,
@@ -15,14 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-        <title>Open Trivia</title>
-      </Head>
-      <ReactQueryProvider>
-        <GameProvider>
-          <body className={inter.className}>{children}</body>
-        </GameProvider>
-      </ReactQueryProvider>
+      <Providers>
+        <body className={`${inter.className} bg-slate-50/95`}>
+          <MaxWidthWrapper>{children}</MaxWidthWrapper>
+        </body>
+      </Providers>
     </html>
   );
 }
