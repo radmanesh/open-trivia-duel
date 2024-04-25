@@ -27,11 +27,16 @@ export default function ScorePage() {
   const { game, getScore, getAnswers, resetGame, getTotalQuestions } =
     useGameContext();
 
+  console.log({ duration: game.duration, qs: game.questionsTimeMatrix });
+
   // --- #of wrong, correct & skipped answers for each round
   const data = useMemo(() => getAnswers(), [getAnswers]);
 
   // --- extracting data for each category
-  const rounds = useMemo(() => data.map((item) => item.round), [data]);
+  const rounds = useMemo(
+    () => data.map((item) => `Round ${item.round}`),
+    [data]
+  );
   const correct = useMemo(() => data.map((item) => item.correct), [data]);
   const incorrect = useMemo(
     () => data.map((item) => -(item.wrong + item.skipped)),
@@ -134,7 +139,6 @@ export default function ScorePage() {
               },
               yaxis: {
                 min: 0,
-                max: 90,
                 title: { text: "time (S)" },
               },
             }}

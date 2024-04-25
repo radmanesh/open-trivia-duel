@@ -56,12 +56,12 @@ type IGameContext = {
   getAnswers: () => RoundAnswer[];
   getTotalQuestions: () => number;
   addQuestionTime: (time: number) => void;
-  updateScore: (answers: RoundAnswer[]) => void;
-  setNextRound: (payload: { id: number; previousRoundTime: number }) => void;
+  setNextRound: (payload: number) => void;
   setCategoryForNextRound: (payload: {
     category: string;
     categoryId: number;
   }) => void;
+  updateScore: (answers: RoundAnswer[]) => void;
 };
 
 // --- game reducer action types
@@ -72,7 +72,7 @@ type Action =
   | { type: "UPDATE_SCORE"; payload: RoundAnswer[] }
   | {
       type: "SET_NEXT_ROUND";
-      payload: { id: number; previousRoundTime: number };
+      payload: number;
     }
   | {
       type: "SET_CATEGORY_FOR_NEXT_ROUND";
@@ -113,12 +113,12 @@ const gameReducer = (state: Game, action: Action): Game => {
     case "SET_NEXT_ROUND":
       return {
         ...state,
-        nextRound: { ...state.nextRound, id: action.payload.id },
-        duration: state.duration + action.payload.previousRoundTime,
+        nextRound: { ...state.nextRound, id: action.payload },
       };
     case "ADD_QUESTION_TIME":
       return {
         ...state,
+        duration: state.duration + action.payload,
         questionsTimeMatrix: [...state.questionsTimeMatrix, action.payload],
       };
     case "SET_CATEGORY_FOR_NEXT_ROUND":
@@ -190,7 +190,7 @@ export const GameProvider = ({ children }: GameProviderProps) => {
   const updateScore = (payload: RoundAnswer[]) =>
     dispatch({ type: "UPDATE_SCORE", payload });
 
-  const setNextRound = (payload: { id: number; previousRoundTime: number }) =>
+  const setNextRound = (payload: number) =>
     dispatch({ payload, type: "SET_NEXT_ROUND" });
 
   const setCategoryForNextRound = (payload: {
@@ -198,8 +198,9 @@ export const GameProvider = ({ children }: GameProviderProps) => {
     categoryId: number;
   }) => dispatch({ payload, type: "SET_CATEGORY_FOR_NEXT_ROUND" });
 
-  const addQuestionTime = (payload: number) =>
+  const addQuestionTime = (payload: number) => {
     dispatch({ payload, type: "ADD_QUESTION_TIME" });
+  };
 
   const getAnswers = (): RoundAnswer[] => {
     const groupedScores: GroupedScores = game.answers.reduce(

@@ -39,11 +39,15 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     [game.answers, game.nextRound.id]
   );
 
-  const [roundTime, setRoundTime] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [questionTimeout, setQuestionTimeOut] = useState(
     timeoutDict[game.level]
+  );
+
+  const elapsedQuestionTime = useMemo(
+    () => timeoutDict[game.level] - questionTimeout,
+    [game.level, questionTimeout]
   );
 
   // --- next question handler
@@ -51,17 +55,10 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     setAnswered(false);
 
     // append question elapsed time to game state
-    addQuestionTime(
-      questionTimeout === timeoutDict[game.level]
-        ? 0
-        : timeoutDict[game.level] - questionTimeout
-    );
+    addQuestionTime(elapsedQuestionTime);
 
     // update current question index
     setCurrentQuestion((prev) => prev + 1);
-
-    // update current round total time
-    setRoundTime((prev) => prev + questionTimeout);
 
     // reset timeout for the next question
     setQuestionTimeOut(timeoutDict[game.level]);
@@ -73,30 +70,28 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     setCurrentQuestion((prev) => prev + 1);
 
     // append question elapsed time to game state
-    addQuestionTime(
-      questionTimeout === timeoutDict[game.level]
-        ? 0
-        : timeoutDict[game.level] - questionTimeout
-    );
+    addQuestionTime(elapsedQuestionTime);
 
     // update current game score
     // increase the # of skipped answers for the round
     updateScore([
       { ...currentRoundScore, skipped: currentRoundScore.skipped + 1 },
     ]);
-    setRoundTime((prev) => prev + questionTimeout);
     setQuestionTimeOut(timeoutDict[game.level]);
   }, [
     addQuestionTime,
-    questionTimeout,
+    elapsedQuestionTime,
     updateScore,
     currentRoundScore,
     game.level,
   ]);
 
   const handleNextRoundClick = () => {
+    // add last answered round question time
+    addQuestionTime(elapsedQuestionTime);
+
     // update next round id
-    setNextRound({ id: game.nextRound.id + 1, previousRoundTime: roundTime });
+    setNextRound(game.nextRound.id + 1);
 
     // go to next round
     router.push("/round");
@@ -104,7 +99,7 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
 
   const handleFinishGameClick = () => {
     // add last question time
-    addQuestionTime(questionTimeout);
+    addQuestionTime(elapsedQuestionTime);
 
     // game finished
     finishGame();
@@ -130,7 +125,14 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     }, 1_000);
 
     return () => clearInterval(timeoutInterval);
-  }, [currentQuestion, game.level, skipQuestion]);
+  }, [
+    currentQuestion,
+    game.level,
+    game.nextRound.id,
+    game.questionsPerRound,
+    game.totalRounds,
+    skipQuestion,
+  ]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
@@ -154,28 +156,41 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
                 {game.level}
               </Badge>
             </div>
-            <p
-              className={cn(
-                "text-center text-2xl font-bold",
-                Math.floor(questionTimeout / 1_000) <= 10 && "text-red-500/95"
-              )}
-            >
-              {Math.floor(questionTimeout / 1_000)}s
-            </p>
+            {currentQuestion + 1 <= game.questionsPerRound && (
+              <p
+                className={cn(
+                  "text-center text-2xl font-bold",
+                  Math.floor(questionTimeout / 1_000) <= 10 && "text-red-500/95"
+                )}
+              >
+                {Math.floor(questionTimeout / 1_000)}s
+              </p>
+            )}
           </div>
         </CardHeader>
         <Separator orientation="horizontal" />
         <CardContent className="py-4">
-          <QuestionCard
-            isAnswered={answered}
-            setIsAnswered={setAnswered}
-            question={questions[currentQuestion]}
-          />
+          {questions[currentQuestion] ? (
+            <QuestionCard
+              isAnswered={answered}
+              setIsAnswered={setAnswered}
+              question={questions[currentQuestion]}
+            />
+          ) : (
+            <div className="p-2 space-y-4 min-h-[150px] max-h-[150px] flex flex-col items-center justify-center w-full">
+              <h2 className="font-bold text-sm md:text-lg text-center">
+                No more questions!
+              </h2>
+            </div>
+          )}
         </CardContent>
         <Separator orientation="horizontal" />
         <CardFooter className="flex flex-row items-center justify-between space-x-4">
           <p className="text-lg font-semibold text-primary">
-            {currentQuestion + 1} of {game.questionsPerRound}{" "}
+            {currentQuestion + 1 < game.questionsPerRound
+              ? currentQuestion + 1
+              : game.questionsPerRound}{" "}
+            of {game.questionsPerRound}{" "}
             {game.questionsPerRound > 1 ? "Questions" : "Question"}
           </p>
           {currentQuestion + 1 >= questions.length ? (
