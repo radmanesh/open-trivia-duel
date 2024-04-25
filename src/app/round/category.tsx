@@ -69,7 +69,7 @@ export const CategoryForm = ({ categories }: CategoryFormProps) => {
         (item) => !game.crossedCategories.includes(item)
       ),
     ];
-    return Math.floor(Math.random() * categoryIds.length);
+    return categoryIds[Math.floor(Math.random() * categoryIds.length)];
   };
 
   // helpers
