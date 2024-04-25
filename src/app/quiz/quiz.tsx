@@ -1,9 +1,12 @@
 "use client";
 
+// --- 3rd party deps
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+// --- internal deps
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
@@ -14,28 +17,27 @@ import { Button } from "@/components/ui/button";
 import QuestionCard from "@/components/question";
 import { Question } from "@/services/use-questions";
 import { Separator } from "@/components/ui/separator";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useGameContext } from "@/contexts/game-provider";
 
+// --- default timeout value for each level
 const timeoutDict = {
   easy: 90_000,
   hard: 30_000,
   medium: 60_000,
 };
 
-const Quiz = ({ questions }: { questions: Question[] }) => {
+export const Quiz = ({ questions }: { questions: Question[] }) => {
   const router = useRouter();
+
+  // --- current game state
   const { game, updateScore, finishGame, setNextRound, addQuestionTime } =
     useGameContext();
 
-  console.log("quiz", { game });
-
+  // --- get current round details
   const currentRoundScore = useMemo(
     () => game.answers.filter((ans) => ans.round === game.nextRound.id)[0],
     [game.answers, game.nextRound.id]
   );
-
-  console.log("quiz", currentRoundScore);
 
   const [roundTime, setRoundTime] = useState(0);
   const [answered, setAnswered] = useState(false);
@@ -44,18 +46,33 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
     timeoutDict[game.level]
   );
 
-  // handlers
+  // --- next question handler
   const nextQuestion = () => {
     setAnswered(false);
+
+    // append question elapsed time to game state
     addQuestionTime(questionTimeout);
+
+    // update current question index
     setCurrentQuestion((prev) => prev + 1);
+
+    // update current round total time
     setRoundTime((prev) => prev + questionTimeout);
+
+    // reset timeout for the next question
     setQuestionTimeOut(timeoutDict[game.level]);
   };
 
+  // --- skip question handler
   const skipQuestion = useCallback(() => {
+    // update current question index
     setCurrentQuestion((prev) => prev + 1);
+
+    // append question elapsed time to game state
     addQuestionTime(questionTimeout);
+
+    // update current game score
+    // increase the # of skipped answers for the round
     updateScore([
       { ...currentRoundScore, skipped: currentRoundScore.skipped + 1 },
     ]);
@@ -69,26 +86,26 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
     game.level,
   ]);
 
-  const handleNetRoundClick = () => {
-    if (game.totalRounds === game.nextRound.id) {
-      // add last question time
-      addQuestionTime(questionTimeout);
+  const handleNextRoundClick = () => {
+    // update next round id
+    setNextRound({ id: game.nextRound.id + 1, previousRoundTime: roundTime });
 
-      // game finished
-      finishGame();
-
-      // go to score screen
-      router.push("/score");
-    } else {
-      // update next round id
-      setNextRound({ id: game.nextRound.id + 1, previousRoundTime: roundTime });
-
-      // go to next round
-      router.push("/round");
-    }
+    // go to next round
+    router.push("/round");
   };
 
-  // effects
+  const handleFinishGameClick = () => {
+    // add last question time
+    addQuestionTime(questionTimeout);
+
+    // game finished
+    finishGame();
+
+    // go to score screen
+    router.push("/score");
+  };
+
+  // --- handle question timeout timer
   useEffect(() => {
     const timeoutInterval = setInterval(() => {
       setQuestionTimeOut((prev) => {
@@ -111,7 +128,7 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50/95">
       <Card className="min-w-full max-w-full min-h-[430px] max-h-[430px] space-y-6">
         <CardHeader>
-          <CardDescription className="flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-2">
               <Badge variant="outline" className="uppercase">
                 {game.nextRound.name}
@@ -137,7 +154,7 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
             >
               {Math.floor(questionTimeout / 1_000)}s
             </p>
-          </CardDescription>
+          </div>
         </CardHeader>
         <Separator orientation="horizontal" />
         <CardContent className="py-4">
@@ -153,10 +170,16 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
             {currentQuestion + 1} of {game.questionsPerRound}{" "}
             {game.questionsPerRound > 1 ? "Questions" : "Question"}
           </p>
-          {questions.length === currentQuestion + 1 ? (
-            <Button disabled={!answered} onClick={handleNetRoundClick}>
-              {game.totalRounds === game.nextRound.id ? "Finish" : "Next Round"}
-            </Button>
+          {currentQuestion + 1 >= questions.length ? (
+            game.totalRounds === game.nextRound.id ? (
+              <Button disabled={!answered} onClick={handleFinishGameClick}>
+                Finish
+              </Button>
+            ) : (
+              <Button disabled={!answered} onClick={handleNextRoundClick}>
+                Next Round
+              </Button>
+            )
           ) : (
             <div className="flex flex-row items-center justify-center gap-4">
               <Button
@@ -176,5 +199,3 @@ const Quiz = ({ questions }: { questions: Question[] }) => {
     </main>
   );
 };
-
-export default Quiz;
