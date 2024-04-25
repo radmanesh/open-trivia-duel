@@ -34,8 +34,8 @@ import { Separator } from "@/components/ui/separator";
 import { BoxesIcon } from "lucide-react";
 
 const formSchema = z.object({
-  rounds: z.number().min(1).max(3),
-  playerName: z.string().min(4).max(15),
+  rounds: z.number().min(1).max(5),
+  playerName: z.string().min(4).max(20),
   questionsPerRound: z.number().min(1).max(10),
   gameDifficulty: z.union([
     z.literal("easy"),
@@ -103,6 +103,9 @@ export default function Home() {
                       <FormControl>
                         <Input placeholder="player name" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Must be between 4 and 20 characters
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -123,7 +126,7 @@ export default function Home() {
                           }
                         />
                       </FormControl>
-                      <FormDescription>Min is 1 and max is 3</FormDescription>
+                      <FormDescription>Must be between 1 and 5</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -144,7 +147,9 @@ export default function Home() {
                           }
                         />
                       </FormControl>
-                      <FormDescription>Min is 1 and max is 10</FormDescription>
+                      <FormDescription>
+                        Must be between 1 and 10
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
