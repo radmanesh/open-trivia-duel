@@ -1,11 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+// --- 3rd party deps
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// --- internal deps
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -15,6 +20,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import {
   Select,
@@ -23,21 +29,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useGameContext } from "@/contexts/game-provider";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 type CategoryFormProps = {
   categories: { id: number; name: string }[];
 };
 
-const MIN = 8;
+const MIN = 9;
 const MAX = 32;
-const categoryFormSchema = z.object({ category: z.string() });
 
+// --- valid category ids are 9:32
+const validCategoryIds = Array.from({ length: MAX - MIN + 1 }).map(
+  (_, i) => i + MIN
+);
+
+const categoryFormSchema = z.object({
+  category: z.string().min(1, "Category is required"),
+});
+
+// --- component
 export const CategoryForm = ({ categories }: CategoryFormProps) => {
   const router = useRouter();
 
@@ -51,7 +63,13 @@ export const CategoryForm = ({ categories }: CategoryFormProps) => {
   });
 
   const getRandom = () => {
-    return Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
+    // filter ids for selected categories before
+    const categoryIds = [
+      ...validCategoryIds.filter(
+        (item) => !game.crossedCategories.includes(item)
+      ),
+    ];
+    return Math.floor(Math.random() * categoryIds.length);
   };
 
   // helpers
@@ -115,6 +133,7 @@ export const CategoryForm = ({ categories }: CategoryFormProps) => {
                         </SelectContent>
                       </Select>
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
