@@ -1,5 +1,10 @@
 "use client";
 
+// --- 3rd party deps
+import { useMemo } from "react";
+import dynamic from "next/dynamic";
+
+// --- internal deps
 import {
   Card,
   CardContent,
@@ -7,9 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useMemo } from "react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { formatTime } from "@/lib/format-time";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useGameContext } from "@/contexts/game-provider";
@@ -18,22 +22,27 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function ScorePage() {
   const router = useRouter();
+
+  // --- game state
   const { game, getScore, getAnswers, resetGame, getTotalQuestions } =
     useGameContext();
 
+  // --- #of wrong, correct & skipped answers for each round
   const data = useMemo(() => getAnswers(), [getAnswers]);
 
-  // Extracting data for each category
+  // --- extracting data for each category
   const rounds = useMemo(() => data.map((item) => item.round), [data]);
   const correct = useMemo(() => data.map((item) => item.correct), [data]);
   const wrong = useMemo(() => data.map((item) => -item.wrong), [data]);
   const skipped = useMemo(() => data.map((item) => -item.skipped), [data]);
 
+  // --- total #of questions
   const totalQuestions = useMemo(
     () => game.questionsPerRound * game.totalRounds,
     [game]
   );
 
+  // --- new game click handler
   const handleNewGameClick = () => {
     resetGame();
     router.push("/");
@@ -48,7 +57,7 @@ export default function ScorePage() {
             <CardDescription>
               You completed the game in{" "}
               <span className="font-bold text-primary">
-                {Math.round(game.duration / 60_000)} mins
+                {formatTime(game.duration)}
               </span>
             </CardDescription>
           </CardHeader>
@@ -119,7 +128,7 @@ export default function ScorePage() {
                 ],
               },
               yaxis: {
-                min: 30,
+                min: 0,
                 max: 90,
                 title: { text: "time (S)" },
               },
