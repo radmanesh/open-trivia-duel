@@ -5,8 +5,8 @@
  */
 export function formatTime(milliseconds: number): string {
   // Convert milliseconds to minutes and seconds
-  const totalSeconds = Math.floor(milliseconds / 1_000);
-  const minutes = Math.floor(totalSeconds / 60);
+  const totalSeconds = Math.round(milliseconds / 1_000);
+  const minutes = Math.round(totalSeconds / 60);
   const seconds = totalSeconds % 60;
 
   // Format the time string
