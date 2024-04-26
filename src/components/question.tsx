@@ -1,8 +1,9 @@
 import { Button } from "./ui/button";
 import { Question } from "@/services/use-questions";
 import { shuffleAnswers } from "@/lib/shuffle";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { useGameContext } from "@/contexts/game-provider";
+import { cn } from "@/lib/utils";
 
 type QuestionProps = {
   question: Question;
@@ -17,12 +18,15 @@ const QuestionCard = ({
 }: QuestionProps) => {
   const { game, updateScore } = useGameContext();
 
+  const [selectedAnswer, setSelectedAnswer] = useState("");
+
   const currentRoundScore = useMemo(
     () => game.answers.filter((ans) => ans.round === game.nextRound.id)[0],
     [game.answers, game.nextRound.id]
   );
 
   const selectOption = (option: string) => {
+    setSelectedAnswer(option);
     const isCorrect = option === question.correct_answer;
     setIsAnswered(true);
     updateScore([
@@ -34,7 +38,7 @@ const QuestionCard = ({
     ]);
   };
 
-  const displayedOptions = useMemo(
+  const shuffledOptions = useMemo(
     () =>
       question &&
       shuffleAnswers([question.correct_answer, ...question.incorrect_answers]),
@@ -49,27 +53,33 @@ const QuestionCard = ({
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
         {isAnswered
-          ? displayedOptions.map((opt, i) => (
+          ? shuffledOptions.map((option, i) => (
               <Button
                 key={i}
                 disabled
-                className="w-full text-wrap md:min-h-[65px]"
-                variant={
-                  opt === question.correct_answer ? "success" : "destructive"
-                }
+                variant="outline"
+                onClick={() => selectOption(option)}
+                className={cn(
+                  "w-full text-wrap md:min-h-[65px]",
+                  option === question.correct_answer &&
+                    "text-green-500 font-bold border border-green-500 bg-green-500/5",
+                  option === selectedAnswer &&
+                    option !== question.correct_answer &&
+                    "text-destructive font-bold border border-destructive bg-destructive/5"
+                )}
               >
-                <span dangerouslySetInnerHTML={{ __html: opt }} />
+                <span dangerouslySetInnerHTML={{ __html: option }} />
               </Button>
             ))
-          : displayedOptions.map((opt, i) => (
+          : shuffledOptions.map((option, i) => (
               <Button
                 key={i}
                 type="button"
                 variant="outline"
+                onClick={() => selectOption(option)}
                 className="w-full text-wrap md:min-h-[65px]"
-                onClick={() => selectOption(opt)}
               >
-                <span dangerouslySetInnerHTML={{ __html: opt }} />
+                <span dangerouslySetInnerHTML={{ __html: option }} />
               </Button>
             ))}
       </div>
