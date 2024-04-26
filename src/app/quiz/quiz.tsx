@@ -86,7 +86,7 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     game.level,
   ]);
 
-  const handleNextRoundClick = () => {
+  const handleNextRoundClick = useCallback(() => {
     // add last answered round question time
     addQuestionTime(elapsedQuestionTime);
 
@@ -95,9 +95,15 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
 
     // go to next round
     router.push("/round");
-  };
+  }, [
+    addQuestionTime,
+    elapsedQuestionTime,
+    game.nextRound.id,
+    router,
+    setNextRound,
+  ]);
 
-  const handleFinishGameClick = () => {
+  const handleFinishGameClick = useCallback(() => {
     // add last question time
     addQuestionTime(elapsedQuestionTime);
 
@@ -106,22 +112,31 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
 
     // go to score screen
     router.push("/score");
-  };
+  }, [addQuestionTime, elapsedQuestionTime, finishGame, router]);
 
   // --- handle question timeout timer
   useEffect(() => {
     const timeoutInterval = setInterval(() => {
-      setQuestionTimeOut((prev) => {
-        if (prev === 0) {
-          // Timer finished
-          clearInterval(timeoutInterval);
-          // Perform actions when timer finishes (e.g., skip question)
+      if (questionTimeout === 0) {
+        // if not last question, skip
+        if (currentQuestion < questions.length - 1) {
           skipQuestion();
-          return timeoutDict[game.level]; // Reset timer to 5 minutes (300 seconds)
         } else {
-          return prev - 1_000; // Decrement time by 1 second
+          if (game.nextRound.id === game.totalRounds) {
+            // game is finished
+            handleFinishGameClick();
+          } else {
+            handleNextRoundClick();
+          }
         }
-      });
+        // clear interval
+        clearInterval(timeoutInterval);
+
+        // reset count down
+        setQuestionTimeOut(timeoutDict[game.level]);
+      } else {
+        setQuestionTimeOut((p) => p - 1_000);
+      }
     }, 1_000);
 
     return () => clearInterval(timeoutInterval);
@@ -131,6 +146,10 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     game.nextRound.id,
     game.questionsPerRound,
     game.totalRounds,
+    handleFinishGameClick,
+    handleNextRoundClick,
+    questionTimeout,
+    questions.length,
     skipQuestion,
   ]);
 
@@ -140,11 +159,11 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
         <CardHeader>
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-2">
-              <Badge variant="outline" className="uppercase">
+              <Badge variant="outline" className="uppercase text-sm">
                 {game.nextRound.name}
               </Badge>
               <Badge
-                className="uppercase"
+                className="uppercase text-sm"
                 variant={
                   game.level === "easy"
                     ? "success"
@@ -156,67 +175,63 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
                 {game.level}
               </Badge>
             </div>
-            {currentQuestion + 1 <= game.questionsPerRound && (
-              <p
-                className={cn(
-                  "text-center text-2xl font-bold",
-                  Math.floor(questionTimeout / 1_000) <= 10 && "text-red-500/95"
-                )}
-              >
-                {Math.floor(questionTimeout / 1_000)}s
-              </p>
-            )}
+            <span
+              className={cn(
+                "text-center text-green-500/95 text-2xl font-bold",
+                Math.floor(questionTimeout / 1_000) <= 20 &&
+                  "text-orange-500/95",
+                Math.floor(questionTimeout / 1_000) <= 10 &&
+                  "text-destructive/95"
+              )}
+            >
+              {Math.floor(questionTimeout / 1_000)}s
+            </span>
           </div>
         </CardHeader>
         <Separator orientation="horizontal" />
         <CardContent className="py-4">
-          {questions[currentQuestion] ? (
-            <QuestionCard
-              isAnswered={answered}
-              setIsAnswered={setAnswered}
-              question={questions[currentQuestion]}
-            />
-          ) : (
-            <div className="p-2 space-y-4 min-h-[150px] max-h-[150px] flex flex-col items-center justify-center w-full">
-              <h2 className="font-bold text-sm md:text-lg text-center">
-                No more questions!
-              </h2>
-            </div>
-          )}
+          <QuestionCard
+            isAnswered={answered}
+            setIsAnswered={setAnswered}
+            question={questions[currentQuestion]}
+          />
         </CardContent>
         <Separator orientation="horizontal" />
-        <CardFooter className="flex flex-row items-center justify-between space-x-4">
-          <p className="text-lg font-semibold text-primary">
-            {currentQuestion + 1 < game.questionsPerRound
-              ? currentQuestion + 1
-              : game.questionsPerRound}{" "}
-            of {game.questionsPerRound}{" "}
-            {game.questionsPerRound > 1 ? "Questions" : "Question"}
-          </p>
-          {currentQuestion + 1 >= questions.length ? (
-            game.totalRounds === game.nextRound.id ? (
-              <Button disabled={!answered} onClick={handleFinishGameClick}>
-                Finish
-              </Button>
-            ) : (
-              <Button disabled={!answered} onClick={handleNextRoundClick}>
-                Next Round
-              </Button>
-            )
-          ) : (
-            <div className="flex flex-row items-center justify-center gap-4">
-              <Button
-                variant="outline"
-                disabled={answered}
-                onClick={skipQuestion}
-              >
-                Skip
-              </Button>
-              <Button disabled={!answered} onClick={nextQuestion}>
-                Next
-              </Button>
+        <CardFooter>
+          <div className="flex flex-row items-center justify-between w-full">
+            <span className="space-x-2">
+              <span className="font-normal text-primary text-2xl">
+                {currentQuestion + 1}
+              </span>
+              /{game.questionsPerRound}
+            </span>
+
+            <div className="flex flex-row gap-2">
+              {/* display skip as long as we haven't reached the last question */}
+              {currentQuestion < questions.length - 1 ? (
+                <>
+                  <Button
+                    variant="outline"
+                    disabled={answered}
+                    onClick={skipQuestion}
+                  >
+                    Skip
+                  </Button>
+                  <Button disabled={!answered} onClick={nextQuestion}>
+                    Next
+                  </Button>
+                </>
+              ) : game.nextRound.id === game.totalRounds ? (
+                <Button disabled={!answered} onClick={handleFinishGameClick}>
+                  Finish
+                </Button>
+              ) : (
+                <Button disabled={!answered} onClick={handleNextRoundClick}>
+                  Next Round
+                </Button>
+              )}
             </div>
-          )}
+          </div>
         </CardFooter>
       </Card>
     </main>
