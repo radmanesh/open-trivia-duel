@@ -16,6 +16,7 @@ Here's the game flow:
 2. **Category Selection:**
 
    - User is prompted to select a category for the current round from a list of available categories.
+   - Once a category is selected for a round, it is removed from the list of available categories for subsequent rounds.
 
 3. **Question Display:**
 
