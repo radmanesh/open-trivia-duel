@@ -124,8 +124,14 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
         } else {
           if (game.nextRound.id === game.totalRounds) {
             // game is finished
+            updateScore([
+              { ...currentRoundScore, skipped: currentRoundScore.skipped + 1 },
+            ]);
             handleFinishGameClick();
           } else {
+            updateScore([
+              { ...currentRoundScore, skipped: currentRoundScore.skipped + 1 },
+            ]);
             handleNextRoundClick();
           }
         }
@@ -142,6 +148,7 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     return () => clearInterval(timeoutInterval);
   }, [
     currentQuestion,
+    currentRoundScore,
     game.level,
     game.nextRound.id,
     game.questionsPerRound,
@@ -151,6 +158,7 @@ export const Quiz = ({ questions }: { questions: Question[] }) => {
     questionTimeout,
     questions.length,
     skipQuestion,
+    updateScore,
   ]);
 
   return (
