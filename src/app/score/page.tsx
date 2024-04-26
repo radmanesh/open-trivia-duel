@@ -126,7 +126,7 @@ export default function ScorePage() {
             height={300}
             options={{
               stroke: { curve: "smooth" },
-              chart: { toolbar: { show: false }, zoom: { enabled: true } },
+              chart: { toolbar: { show: false }, zoom: { enabled: false } },
               xaxis: {
                 title: { text: "question" },
                 categories: [
