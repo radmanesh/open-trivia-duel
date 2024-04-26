@@ -63,4 +63,9 @@ Here's the game flow:
 
 ### Normal Game Flow
 
+https://github.com/ahmedsomaa/open-trivia/assets/29373629/9ed386f6-821f-4983-b169-b16d7c35212a
+
 ### Question Timeout
+
+https://github.com/ahmedsomaa/open-trivia/assets/29373629/7347140b-9da0-4998-8df1-fac87aad5832
+
