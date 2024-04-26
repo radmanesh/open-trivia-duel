@@ -62,10 +62,10 @@ const QuestionCard = ({
                 className={cn(
                   "w-full text-wrap md:min-h-[65px]",
                   option === question.correct_answer &&
-                    "text-green-500 font-bold border border-green-500 bg-green-500/5",
+                    "text-green-500 font-bold border border-green-500 bg-green-500/5 hover:bg-green-500/10 hover:text-green-500/90",
                   option === selectedAnswer &&
                     option !== question.correct_answer &&
-                    "text-destructive font-bold border border-destructive bg-destructive/5"
+                    "text-destructive font-bold border border-destructive bg-destructive/5 hover:bg-destructive/10 hover:text-destructive/90"
                 )}
               >
                 <span dangerouslySetInnerHTML={{ __html: option }} />
