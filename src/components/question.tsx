@@ -44,7 +44,7 @@ const QuestionCard = ({
   return (
     <div className="p-2 space-y-4 min-h-[150px] max-h-[150px] flex flex-col items-start justify-center w-full">
       <h2
-        className="font-bold text-sm md:text-lg"
+        className="font-bold text-sm md:text-base"
         dangerouslySetInnerHTML={{ __html: question.question }}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
