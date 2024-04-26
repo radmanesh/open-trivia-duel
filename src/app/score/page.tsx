@@ -27,8 +27,6 @@ export default function ScorePage() {
   const { game, getScore, getAnswers, resetGame, getTotalQuestions } =
     useGameContext();
 
-  console.log({ duration: game.duration, qs: game.questionsTimeMatrix });
-
   // --- #of wrong, correct & skipped answers for each round
   const data = useMemo(() => getAnswers(), [getAnswers]);
 
